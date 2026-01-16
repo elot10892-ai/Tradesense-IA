@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyd
+.env
+venv/
+instance/
+*.db
+
+# Logs and debug
+*.log
+*.txt
+
+# Tests
+test_*.py
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,191 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Configuration des variables CSS - Thème Dark par défaut pour TradeSense */
+:root {
+  /* Couleurs de base (Dark Mode par défaut) */
+  --color-bg-main: #0b0e11;
+  --color-bg-card: #1e2329;
+  --color-bg-input: #2b3139;
+  --color-border: #1f2937;
+
+  /* Texte */
+  --color-text-main: #eaecef;
+  --color-text-muted: #848e9c;
+
+  /* Trading Colors */
+  --color-success: #0ecb81;
+  --color-danger: #f6465d;
+  --color-warning: #f0b90b;
+  --color-info: #3b82f6;
+
+  /* UI Accents */
+  --color-primary: #f0b90b;
+  --color-secondary: #474d57;
+  --color-accent: #3b82f6;
+}
+
+html.light {
+  /* Light Mode Overrides */
+  --color-bg-main: #f3f4f6;
+  --color-bg-card: #ffffff;
+  --color-bg-input: #e5e7eb;
+  --color-border: #e5e7eb;
+
+  --color-text-main: #111827;
+  --color-text-muted: #6b7280;
+
+  --color-secondary: #e5e7eb;
+}
+
+
+
+/* Styles globaux */
+@layer base {
+  body {
+    @apply bg-background text-text-primary font-sans antialiased;
+    background-color: var(--color-bg-main);
+    color: var(--color-text-main);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-background-input;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-secondary rounded;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-background-card rounded-lg shadow-card p-4 border;
+    border-color: var(--color-border);
+  }
+
+  .btn-buy {
+    @apply w-full py-3 rounded font-bold text-white bg-success hover:opacity-90 transition-opacity uppercase tracking-wide shadow-lg hover:shadow-glow-green;
+  }
+
+  .btn-sell {
+    @apply w-full py-3 rounded font-bold text-white bg-danger hover:opacity-90 transition-opacity uppercase tracking-wide shadow-lg hover:shadow-glow-red;
+  }
+
+  .btn-primary {
+    @apply px-4 py-2 rounded font-medium bg-primary text-black hover:opacity-90 transition-colors;
+  }
+
+  .input-trade {
+    @apply w-full bg-background-input border rounded p-2 text-right text-text-primary focus:border-primary focus:outline-none transition-colors;
+    border-color: var(--color-border);
+  }
+
+  /* Custom Animations */
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-shake {
+    animation: shake 0.2s ease-in-out 0s 2;
+  }
+
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .5;
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-secondary);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
