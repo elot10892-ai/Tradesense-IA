@@ -1,7 +1,9 @@
-# Python
+# Python cache
 __pycache__/
 *.pyc
 *.pyd
+
+# Environments
 .env
 venv/
 instance/
@@ -13,6 +15,26 @@ instance/
 
 # Tests
 test_*.py
+
+# Root utility scripts
+check_*.py
+cleanup_*.py
+migrate_*.py
+optimize_*.py
+verify_*.py
+
+# Backend debug & seed scripts
+backend/debug_*.py
+backend/diagnose_*.py
+backend/seed_*.py
+backend/make_*.py
+backend/create_*.py
+backend/check_*.py
+backend/test_*.py
+backend/verify_*.py
+
+# Services not used by app.py
+backend/app/services/auth_service.py
 
 # Node
 node_modules/
