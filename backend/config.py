@@ -37,8 +37,9 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    # ⚠️ Ligne modifiée pour prod : /tmp autorisé pour l’écriture
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/trading_platform_prod.db'
+    # On utilise le dossier temporaire de Railway pour SQLite
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:////tmp/trading_platform_prod.db'
+
 
 config = {
     'development': DevelopmentConfig,
