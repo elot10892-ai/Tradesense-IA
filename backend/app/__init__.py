@@ -1,13 +1,3 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
-from flask_cors import CORS
-from config import config
-
-# Initialiser les extensions Flask
-db = SQLAlchemy()
-jwt = JWTManager()
-
 def create_app(config_name=None):
     """
     Créer et configurer l'instance de l'application Flask
@@ -54,6 +44,11 @@ def create_app(config_name=None):
     app.register_blueprint(masterclass_bp)
     app.register_blueprint(ai_bp)
     
+    # --- Route test racine pour vérifier que le backend fonctionne ---
+    @app.route("/")
+    def index():
+        return {"message": "Backend opérationnel !"}
+
     # Créer les tables de la base de données si elles n'existent pas
     with app.app_context():
         db.create_all()
