@@ -37,10 +37,8 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    # Utiliser un chemin temporaire que Railway autorise
-    SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/trading_platform_prod.db'
-
-
+    # Utiliser la database PostgreSQL de Railway
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')  # on lit depuis l'environnement
 
 
 config = {
