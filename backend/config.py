@@ -55,6 +55,10 @@ class ProductionConfig(Config):
     # Railway fournit automatiquement DATABASE_URL
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'postgresql://user:password@localhost:5432/dbname'
+    CORS_ORIGINS = [
+        "https://tradesense-ia-production.up.railway.app",
+        "https://tradesense-ia-143h.vercel.app",  # Ton frontend Vercel
+    ]
 
 
 # =================================================================

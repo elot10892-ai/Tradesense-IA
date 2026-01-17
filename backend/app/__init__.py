@@ -21,8 +21,12 @@ def create_app(config_name=None):
     db.init_app(app)
     jwt.init_app(app)
 
-    # CORS
-    CORS(app, origins=app.config['CORS_ORIGINS'])
+    # CORS : ajouter ici le domaine de Vercel et Railway
+    CORS(app, origins=[
+        "http://localhost:3000",
+        "https://tradesense-ia-production.up.railway.app",  # ton backend Railway
+        "https://tradesense-ia-143h.vercel.app"            # ton frontend Vercel
+    ])
 
     # Blueprints
     from app.routes.auth_routes import auth_bp
@@ -49,7 +53,7 @@ def create_app(config_name=None):
     app.register_blueprint(masterclass_bp)
     app.register_blueprint(ai_bp)
 
-    # ✅ UNE SEULE route racine
+    # ✅ Route racine unique
     @app.route("/")
     def health():
         return {
