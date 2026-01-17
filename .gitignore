@@ -12,7 +12,8 @@ instance/
 # Logs and debug
 *.log
 *.txt
-
+# MAIS garder requirements.txt
+!requirements.txt
 # Tests
 test_*.py
 
