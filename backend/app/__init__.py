@@ -56,8 +56,11 @@ def create_app(config_name=None):
     
     # --- Route test racine pour vérifier que le backend fonctionne ---
    @app.route("/")
-def index():
- return {"status": "TradeSense AI backend running"}, 200
+def home():
+    return {
+        "message": "TradeSense API online",
+        "status": "ok"
+    }
 
 
  # Créer les tables de la base de données si elles n'existent pas
