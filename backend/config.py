@@ -37,8 +37,9 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
-    # On utilise le dossier temporaire de Railway pour SQLite
+    # chemin sûr pour Railway
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:////tmp/trading_platform_prod.db'
+
 
 
 config = {
