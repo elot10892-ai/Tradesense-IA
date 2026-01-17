@@ -1,3 +1,13 @@
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager
+from flask_cors import CORS
+from config import config
+
+# Initialiser les instances des extensions (en dehors de la factory pour pouvoir les importer ailleurs)
+db = SQLAlchemy()
+jwt = JWTManager()
+
 def create_app(config_name=None):
     """
     Créer et configurer l'instance de l'application Flask
