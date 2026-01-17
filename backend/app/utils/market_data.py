@@ -114,36 +114,38 @@ def get_historical_data(symbol: str, period: str = "1mo") -> Optional[List[Dict]
             print(f"[MarketData] History empty for {symbol_upper}. Generating mock data.")
             
             MOROCCO_BASE_PRICES = {
-                'IAM.CS': 112.50,
-                'ATW.CS': 485.00,
-                'BCP.CS': 295.00,
-                'MNG.CS': 2450.00,
-                'AFMA.CS': 1450.00,
-                'BOA.CS': 190.0,
-                'CIM.CS': 1800.0,
-                'BCI.CS': 290.0,
-                'CFG.CS': 165.0
+                'IAM.CS': 105.50, 'ATW.CS': 495.00, 'BCP.CS': 298.00, 'MNG.CS': 2550.00,
+                'AFMA.CS': 1480.00, 'BOA.CS': 195.0, 'CIM.CS': 1850.0, 'BCI.CS': 285.0,
+                'CFG.CS': 170.0
             }
             
             base_price = 150.0
             if symbol_upper.endswith('.CS'):
                 base_price = MOROCCO_BASE_PRICES.get(symbol_upper, 150.0)
-            elif 'XAU' in symbol_upper:
-                base_price = 2025.0
+            elif 'XAU' in symbol_upper or 'GC=F' in symbol_upper:
+                base_price = 2050.0
+            elif 'BTC' in symbol_upper:
+                base_price = 68000.0
+            elif 'EUR' in symbol_upper or 'GBP' in symbol_upper or 'USD' in symbol_upper:
+                if 'JPY' in symbol_upper: base_price = 149.0
+                else: base_price = 1.10
             elif 'AAPL' in symbol_upper:
-                base_price = 185.0
+                base_price = 190.0
             
-            scale = base_price * 0.01
+            scale = base_price * 0.015
             data = []
             now = datetime.now()
             for i in range(30):
                 day = now - timedelta(days=30-i)
+                # Random walk simulation
+                change = random.uniform(-scale, scale)
+                base_price += change
                 data.append({
                     'date': day.strftime('%Y-%m-%d'),
-                    'open': round(base_price + random.uniform(-scale, scale), 2),
-                    'high': round(base_price + random.uniform(scale, scale*2), 2),
-                    'low': round(base_price + random.uniform(-scale*2, -scale), 2),
-                    'close': round(base_price + random.uniform(-scale, scale), 2),
+                    'open': round(base_price - random.uniform(0, scale/2), 4),
+                    'high': round(base_price + random.uniform(scale/2, scale), 4),
+                    'low': round(base_price - random.uniform(scale/2, scale), 4),
+                    'close': round(base_price, 4),
                 })
             return data
             
@@ -161,38 +163,27 @@ def get_historical_data(symbol: str, period: str = "1mo") -> Optional[List[Dict]
         print(f"[MarketData] History error for {symbol}: {str(e)}")
         
         # Immediate Mock Fallback on Error (Rate limits, connection, etc.)
-        if symbol_upper.endswith('.CS') or 'XAU' in symbol_upper or 'AAPL' in symbol_upper:
-            print(f"[MarketData] Emergency mock generation for {symbol_upper}")
-            
-            MOROCCO_BASE_PRICES = {
-                'IAM.CS': 112.50, 'ATW.CS': 485.00, 'BCP.CS': 295.00, 'MNG.CS': 2450.00,
-                'AFMA.CS': 1450.00, 'BOA.CS': 190.0, 'CIM.CS': 1800.0, 'BCI.CS': 290.0,
-                'CFG.CS': 165.0
-            }
-            
-            base_price = 150.0
-            if symbol_upper.endswith('.CS'):
-                base_price = MOROCCO_BASE_PRICES.get(symbol_upper, 150.0)
-            elif 'XAU' in symbol_upper:
-                base_price = 2025.0
-            elif 'AAPL' in symbol_upper:
-                base_price = 185.0
-            
-            scale = base_price * 0.01
-            data = []
-            now = datetime.now()
-            for i in range(30):
-                day = now - timedelta(days=30-i)
-                data.append({
-                    'date': day.strftime('%Y-%m-%d'),
-                    'open': round(base_price + random.uniform(-scale, scale), 2),
-                    'high': round(base_price + random.uniform(scale, scale*2), 2),
-                    'low': round(base_price + random.uniform(-scale*2, -scale), 2),
-                    'close': round(base_price + random.uniform(-scale, scale), 2),
-                })
-            return data
-            
-        return None
+        print(f"[MarketData] Emergency mock generation for {symbol_upper}")
+        
+        base_price = 200.0
+        if symbol_upper.endswith('.CS'): base_price = 150.0
+        elif 'XAU' in symbol_upper: base_price = 2050.0
+        elif 'BTC' in symbol_upper: base_price = 68000.0
+        
+        scale = base_price * 0.02
+        data = []
+        now = datetime.now()
+        for i in range(30):
+            day = now - timedelta(days=30-i)
+            data.append({
+                'date': day.strftime('%Y-%m-%d'),
+                'open': round(base_price + random.uniform(-scale, scale), 4),
+                'high': round(base_price + random.uniform(scale, scale*2), 4),
+                'low': round(base_price + random.uniform(-scale*2, -scale), 4),
+                'close': round(base_price + random.uniform(-scale, scale), 4),
+            })
+        return data
+
 
 def get_multiple_quotes(symbols: List[str]) -> Dict[str, Optional[Dict]]:
     results = {}
