@@ -66,7 +66,13 @@
         "confidence": "Conf",
         "view_all": "View all signals",
         "buy": "BUY",
-        "sell": "SELL"
+        "sell": "SELL",
+        "time": "Time ago",
+        "price": "Signal Price",
+        "type": "Signal",
+        "just_now": "Just now",
+        "analyzing": "AI Analyzing...",
+        "waiting": "Waiting for market data..."
     },
     "pricing": {
         "title": "Choose Your Capital",

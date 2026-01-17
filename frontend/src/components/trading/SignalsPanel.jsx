@@ -1,88 +1,93 @@
 import { useTranslation } from 'react-i18next';
-import { Activity, Zap, BarChart3, Clock, Loader2 } from 'lucide-react';
-import usePricePolling from '../../hooks/usePricePolling';
-import { useMemo } from 'react';
+import { Zap, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import api from '../../api/axios';
 
 const SignalsPanel = () => {
     const { t } = useTranslation();
-    const { prices, loading } = usePricePolling(10000); // Poll every 10s for signals
+    const [signals, setSignals] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Generate signals based on real prices
-    const signals = useMemo(() => {
-        if (!prices || Object.keys(prices).length === 0) return [];
+    const fetchSignals = async () => {
+        try {
+            const response = await api.get('/api/ai/signals');
+            // Show top 5 signals
+            setSignals(response.data.signals);
+        } catch (err) {
+            console.error('[SignalsPanel] Error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        const activeSymbols = ['XAUUSD', 'BTCUSD', 'EURUSD', 'AAPL', 'TSLA', 'US30'];
-        return activeSymbols
-            .filter(sym => prices[sym] || prices[`${sym}=X`] || prices[`${sym}-USD`])
-            .map((symbol, index) => {
-                const priceData = prices[symbol] || prices[`${sym}=X`] || prices[`${sym}-USD`];
-                const price = typeof priceData === 'object' ? priceData.price : priceData;
-                const change = typeof priceData === 'object' ? (priceData.change_percent || 0) : 0;
+    useEffect(() => {
+        fetchSignals();
+        const interval = setInterval(fetchSignals, 30000);
+        return () => clearInterval(interval);
+    }, []);
 
-                // Deterministic type based on symbol name to keep it "stable" but based on real data
-                const type = (symbol.length + index) % 2 === 0 ? 'BUY' : 'SELL';
-
-                return {
-                    id: symbol,
-                    symbol,
-                    type,
-                    price: price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '---',
-                    confidence: 75 + (Math.abs(change) % 20),
-                    time: t('signals.just_now') || '1m ago'
-                };
-            }).slice(0, 4); // Show top 4
-    }, [prices, t]);
+    const formatTimeAgo = (timestamp) => {
+        const diff = Math.floor((new Date() - new Date(timestamp)) / 1000 / 60);
+        if (diff < 1) return t('signals.just_now') || 'just now';
+        return `${diff}m ago`;
+    };
 
     return (
-        <div className="bg-background-card border border-border rounded-xl p-5 shadow-lg mt-6">
-            <h3 className="font-bold text-lg mb-4 text-text-primary flex items-center gap-2">
-                <Zap className="w-5 h-5 text-accent" />
-                {t('signals.title')}
-            </h3>
-
-            {loading && Object.keys(prices).length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8">
-                    <Loader2 className="w-6 h-6 text-primary animate-spin mb-2" />
-                    <span className="text-[10px] text-text-secondary uppercase tracking-widest">{t('signals.analyzing') || 'Analyse IA...'}</span>
+        <div className="bg-background-card border border-border rounded-2xl flex flex-col h-full shadow-2xl overflow-hidden">
+            <div className="p-5 border-b border-border bg-background-input/30 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                        <Zap className="w-4 h-4 text-primary" />
+                    </div>
+                    <h3 className="font-black text-sm text-text-primary uppercase tracking-tighter">Signaux IA</h3>
                 </div>
-            ) : (
-                <div className="space-y-3">
-                    {signals.length > 0 ? signals.map(signal => (
-                        <div key={signal.id} className="p-3 bg-background-input/50 rounded-lg border border-border flex justify-between items-center hover:bg-secondary/20 transition-colors">
-                            <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-full ${signal.type === 'BUY' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
-                                    <Activity className="w-4 h-4" />
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-success/10 border border-success/20 rounded-full text-[9px] text-success font-black uppercase tracking-widest animate-pulse">
+                    LIVE
+                </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto no-scrollbar p-2 space-y-2">
+                {loading && signals.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 gap-3 grayscale opacity-50">
+                        <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                        <span className="text-[9px] text-text-secondary uppercase font-black tracking-widest tracking-[0.2em]">{t('signals.analyzing')}</span>
+                    </div>
+                ) : signals.length > 0 ? (
+                    signals.map((signal, index) => (
+                        <div key={index} className="p-3 bg-background-input/40 rounded-xl border border-border hover:bg-primary/5 hover:border-primary/30 transition-all group flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-black text-text-primary text-base tracking-tighter group-hover:text-primary transition-colors">{signal.symbol}</span>
+                                    <span className="text-[10px] text-text-secondary font-mono opacity-60">• {formatTimeAgo(signal.timestamp)}</span>
                                 </div>
-                                <div>
-                                    <div className="font-bold text-text-primary">{signal.symbol}</div>
-                                    <div className="text-xs text-text-secondary flex items-center gap-1 font-mono">
-                                        <Clock className="w-3 h-3" /> {signal.time}
-                                    </div>
+                                <div className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${signal.signal === 'BUY' ? 'bg-success/20 text-success' :
+                                    signal.signal === 'SELL' ? 'bg-danger/20 text-danger' :
+                                        'bg-background-input text-text-secondary'
+                                    }`}>
+                                    {signal.signal === 'BUY' ? t('signals.buy') :
+                                        signal.signal === 'SELL' ? t('signals.sell') :
+                                            t('signals.hold') || 'HOLD'}
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <div className={`font-bold font-mono text-sm ${signal.type === 'BUY' ? 'text-success' : 'text-danger'}`}>
-                                    {signal.type === 'BUY' ? t('signals.buy') : t('signals.sell')} @ {signal.price}
+                            <div className="flex items-center justify-between mt-1">
+                                <div className="font-mono text-xs font-bold text-text-secondary">
+                                    @ {signal.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                 </div>
-                                <div className="text-[10px] text-text-secondary font-black uppercase tracking-tighter">
-                                    {t('signals.confidence')}: <span className="text-accent">{signal.confidence.toFixed(0)}%</span>
+                                <div className="flex flex-col items-end">
+                                    <span className="text-[9px] text-text-secondary font-black uppercase tracking-widest opacity-60">Confiance</span>
+                                    <span className="text-xs font-black text-accent">Conf: {signal.confidence}%</span>
                                 </div>
                             </div>
                         </div>
-                    )) : (
-                        <div className="text-center py-4 text-xs text-text-secondary italic">
-                            {t('signals.waiting') || 'En attente de données de marché...'}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            <button className="w-full mt-4 py-2 bg-secondary hover:bg-secondary/80 text-sm text-text-primary rounded-lg transition-colors flex items-center justify-center gap-2 font-bold uppercase tracking-widest text-[10px]">
-                <BarChart3 className="w-4 h-4" /> {t('signals.view_all')}
-            </button>
+                    ))
+                ) : (
+                    <div className="text-center py-10 text-[10px] text-text-secondary italic font-black uppercase tracking-widest opacity-40">
+                        Aucun signal actif
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
 
 export default SignalsPanel;
-

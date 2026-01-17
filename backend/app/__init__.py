@@ -39,6 +39,7 @@ def create_app(config_name=None):
     from app.routes.news_routes import news_bp
     from app.routes.community_routes import community_bp
     from app.routes.masterclass_routes import masterclass_bp
+    from app.routes.ai_routes import ai_bp
     
     # Enregistrer les blueprints dans l'application
     app.register_blueprint(auth_bp)
@@ -51,6 +52,7 @@ def create_app(config_name=None):
     app.register_blueprint(news_bp)
     app.register_blueprint(community_bp)
     app.register_blueprint(masterclass_bp)
+    app.register_blueprint(ai_bp)
     
     # Créer les tables de la base de données si elles n'existent pas
     with app.app_context():

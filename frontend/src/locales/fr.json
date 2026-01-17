@@ -63,10 +63,14 @@
     },
     "signals": {
         "title": "Signaux IA",
-        "confidence": "Conf",
-        "view_all": "Voir tous les signaux",
+        "confidence": "Confiance (%)",
         "buy": "ACHAT",
-        "sell": "VENTE"
+        "sell": "VENTE",
+        "hold": "NEUTRE",
+        "time": "Temps",
+        "price": "Prix",
+        "just_now": "À l'instant",
+        "analyzing": "Analyse IA..."
     },
     "pricing": {
         "title": "Choisissez votre Capital",

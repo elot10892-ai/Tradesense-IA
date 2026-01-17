@@ -148,12 +148,13 @@ def get_trade_history():
         unique_symbols = {t.symbol for t in trades if not t.is_closed}
         
         for symbol in unique_symbols:
-            if symbol.endswith('.CS'):
-                quote = get_moroccan_stock_price(symbol)
+            symbol_upper = symbol.upper().strip()
+            if symbol_upper.endswith('.CS'):
+                quote = get_moroccan_stock_price(symbol_upper)
             else:
-                quote = get_stock_quote(symbol)
+                quote = get_stock_quote(symbol_upper)
             
-            if quote:
+            if quote and quote.get('price'):
                 current_prices[symbol] = quote.get('price')
 
         print(f"[Trading] Found {len(trades)} historical trades. Unique open symbols: {len(unique_symbols)}")
@@ -189,13 +190,17 @@ def get_challenge_trades(challenge_id):
         unique_symbols = {t.symbol for t in trades if not t.is_closed}
         
         for symbol in unique_symbols:
-            if symbol.endswith('.CS'):
-                quote = get_moroccan_stock_price(symbol)
+            symbol_upper = symbol.upper().strip()
+            if symbol_upper.endswith('.CS'):
+                quote = get_moroccan_stock_price(symbol_upper)
             else:
-                quote = get_stock_quote(symbol)
+                quote = get_stock_quote(symbol_upper)
             
-            if quote:
+            if quote and quote.get('price'):
                 current_prices[symbol] = quote.get('price')
+                print(f"[Trading] Price found for {symbol}: {quote.get('price')}")
+            else:
+                print(f"[Trading WARNING] No price found for {symbol}")
         
         print(f"[Trading] Returning {len(trades)} trades for challenge {challenge_id}")
         
@@ -220,10 +225,11 @@ def get_challenge_status(challenge_id):
         open_trades = Trade.query.filter_by(challenge_id=challenge_id, is_closed=False).all()
         total_unrealized_pnl = 0
         for t in open_trades:
-            if t.symbol.endswith('.CS'):
-                quote = get_moroccan_stock_price(t.symbol)
+            symbol_upper = t.symbol.upper().strip()
+            if symbol_upper.endswith('.CS'):
+                quote = get_moroccan_stock_price(symbol_upper)
             else:
-                quote = get_stock_quote(t.symbol)
+                quote = get_stock_quote(symbol_upper)
             if quote and quote.get('price'):
                 total_unrealized_pnl += t.calculate_unrealized_pnl(quote['price'])
         

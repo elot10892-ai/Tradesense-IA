@@ -15,6 +15,7 @@ import CommunityZone from '../components/dashboard/CommunityZone';
 import MasterClass from '../components/dashboard/MasterClass';
 import Pricing from './Pricing';
 import Leaderboard from './Leaderboard';
+import SignalsPanel from '../components/trading/SignalsPanel';
 
 const StatsCard = ({ title, value, subtext, icon: Icon, colorClass = "text-primary" }) => (
     <div className="bg-background-card p-4 rounded-xl border border-border shadow-sm transition-all hover:border-secondary">
@@ -320,112 +321,163 @@ const Dashboard = () => {
                                     <LiveTicker />
                                 </div>
 
-                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                                    <div className="lg:col-span-9 space-y-10">
-                                        <div className="bg-background-card rounded-2xl border border-border p-1 overflow-hidden shadow-2xl">
-                                            <div className="p-5 border-b border-border flex justify-between items-center bg-background-input/30">
-                                                <div className="flex items-center gap-4">
-                                                    <span className="font-black text-text-primary text-xl tracking-tight">{selectedSymbol}</span>
-                                                    {selectedMarketType === 'MAROC' && <span className="px-2 py-0.5 bg-red-500/10 text-red-500 text-[10px] font-black rounded border border-red-500/20 uppercase">BVC</span>}
+                                <div className="space-y-10">
+                                    {/* Row 1: Graphique | Instrument */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+                                        <div className="lg:col-span-9">
+                                            <div className="bg-background-card rounded-2xl border border-border p-1 overflow-hidden shadow-2xl h-full">
+                                                <div className="p-5 border-b border-border flex justify-between items-center bg-background-input/30">
+                                                    <div className="flex items-center gap-4">
+                                                        <span className="font-black text-text-primary text-xl tracking-tight">{selectedSymbol}</span>
+                                                        {selectedMarketType === 'MAROC' && <span className="px-2 py-0.5 bg-red-500/10 text-red-500 text-[10px] font-black rounded border border-red-500/20 uppercase">BVC</span>}
+                                                    </div>
+                                                    <button onClick={handleSync} className="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-[11px] font-black transition-all uppercase border border-primary/20">
+                                                        <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                                                        {t('dashboard.sync')}
+                                                    </button>
                                                 </div>
-                                                <button onClick={handleSync} className="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-[11px] font-black transition-all uppercase border border-primary/20">
-                                                    <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                                                    {t('dashboard.sync')}
-                                                </button>
-                                            </div>
-                                            <div className="h-[550px]">
-                                                {selectedSymbol && <PriceChart symbol={selectedSymbol} />}
+                                                <div className="h-[550px]">
+                                                    {selectedSymbol && <PriceChart symbol={selectedSymbol} />}
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <div className="bg-background-card rounded-2xl border border-border overflow-hidden shadow-xl">
-                                            <div className="p-6 border-b border-border bg-background-input/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                                                <div className="flex items-center gap-8">
-                                                    <div className="flex items-center gap-3">
-                                                        <Clock className="w-5 h-5 text-primary" />
-                                                        <span className="font-black text-[11px] uppercase tracking-[0.2em] text-text-secondary">{t('trading.ledger')}</span>
-                                                    </div>
-                                                    <div className="flex bg-background-input p-1.5 rounded-xl border border-border shadow-sm">
-                                                        <button onClick={() => setViewMode('CHALLENGE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${viewMode === 'CHALLENGE' ? 'bg-primary text-black shadow-md' : 'text-text-secondary hover:text-text-primary'}`}>{t('trading.challenge')}</button>
-                                                        <button onClick={() => setViewMode('HISTORY')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${viewMode === 'HISTORY' ? 'bg-primary text-black shadow-md' : 'text-text-secondary hover:text-text-primary'}`}>{t('trading.history')}</button>
-                                                    </div>
-                                                </div>
-                                                <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-                                                    <input type="text" placeholder={t('trading.filter_symbol')} value={searchSymbol} onChange={(e) => setSearchSymbol(e.target.value)} className="bg-background-input border border-border rounded-xl px-4 py-2 text-[11px] text-text-primary outline-none focus:ring-1 focus:ring-primary w-full md:w-40" />
-                                                    <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-background-input border border-border rounded-xl px-3 py-2 text-[11px] text-text-primary outline-none focus:ring-1 focus:ring-primary">
-                                                        <option value="ALL">{t('trading.all')}</option>
-                                                        <option value="OPEN">{t('trading.open')}</option>
-                                                        <option value="CLOSED">{t('trading.closed')}</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="overflow-x-auto max-h-[500px] custom-scrollbar">
-                                                <table className="w-full text-left rtl:text-right">
-                                                    <thead className="bg-background-input/50 text-text-secondary text-[10px] uppercase font-black tracking-[0.2em] sticky top-0 z-10">
-                                                        <tr>
-                                                            <th className="p-6">{t('trading.instrument')}</th>
-                                                            <th className="p-6 text-center">{t('trading.type')}</th>
-                                                            <th className="p-6">{t('trading.entry')}</th>
-                                                            <th className="p-6">{t('trading.volume')}</th>
-                                                            <th className="p-6 text-right rtl:text-left">{t('trading.pnl')} ($)</th>
-                                                            {viewMode === 'CHALLENGE' && <th className="p-6 text-center">{t('admin.actions')}</th>}
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="text-sm text-text-secondary divide-y divide-border/50">
-                                                        {displayedTrades.length === 0 ? (
-                                                            <tr><td colSpan="6" className="p-16 text-center text-text-secondary font-bold italic opacity-60">{t('trading.no_positions')}</td></tr>
-                                                        ) : (
-                                                            displayedTrades.map(trade => (
-                                                                <tr key={trade.id} className="hover:bg-primary/5 transition-all group">
-                                                                    <td className="p-6">
-                                                                        <div className="font-black text-text-primary group-hover:text-primary transition-colors text-base">{trade.symbol}</div>
-                                                                        <div className="text-[10px] text-text-secondary font-mono mt-1">{new Date(trade.timestamp).toLocaleString()}</div>
-                                                                    </td>
-                                                                    <td className="p-6 text-center">
-                                                                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-wider transition-all duration-300 ${trade.trade_type === 'BUY'
-                                                                            ? 'bg-success/20 text-success shadow-[0_0_12px_rgba(14,203,129,0.15)]'
-                                                                            : 'bg-danger/20 text-danger shadow-[0_0_12px_rgba(246,70,93,0.15)]'}`}>
-                                                                            <Activity className="w-3 h-3" />
-                                                                            {trade.trade_type === 'BUY' ? t('trading.buy') : t('trading.sell')}
-                                                                        </div>
-                                                                    </td>
-                                                                    <td className="p-6 font-mono text-text-secondary text-sm">${trade.entry_price?.toFixed(2)}</td>
-                                                                    <td className="p-6">
-                                                                        <div className="flex flex-col">
-                                                                            <span className="font-black text-text-primary">{trade.quantity}</span>
-                                                                            <span className="text-[9px] text-text-secondary uppercase font-black tracking-tighter opacity-70">{trade.symbol.includes('.CS') ? 'Actions' : 'Lots'}</span>
-                                                                        </div>
-                                                                    </td>
-                                                                    <td className={`p-6 text-right rtl:text-left font-black font-mono text-base ${(trade.is_closed ? trade.profit_loss : (trade.unrealized_pnl || 0)) >= 0 ? 'text-success' : 'text-danger'}`}>
-                                                                        <div className="flex flex-col items-end rtl:items-start">
-                                                                            <span>{(trade.is_closed ? trade.profit_loss : (trade.unrealized_pnl || 0)) >= 0 ? '+' : ''}${(trade.is_closed ? trade.profit_loss : (trade.unrealized_pnl || 0)).toFixed(2)}</span>
-                                                                            {!trade.is_closed && <span className="text-[9px] text-primary animate-pulse uppercase font-black tracking-widest">{t('trading.live_feed')}</span>}
-                                                                        </div>
-                                                                    </td>
-                                                                    {viewMode === 'CHALLENGE' && (
-                                                                        <td className="p-6 text-center">
-                                                                            {!trade.is_closed ? (
-                                                                                <button
-                                                                                    onClick={() => handleCloseTrade(trade)}
-                                                                                    className="px-4 py-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/20 rounded-xl text-[10px] font-black transition-all uppercase shadow-sm"
-                                                                                >
-                                                                                    {t('trading.close')}
-                                                                                </button>
-                                                                            ) : (
-                                                                                <span className="text-[10px] text-text-secondary font-black uppercase italic opacity-50">{t('trading.closed')}</span>
-                                                                            )}
-                                                                        </td>
-                                                                    )}
-                                                                </tr>
-                                                            ))
-                                                        )}
-                                                    </tbody>
-                                                </table>
-                                            </div>
+                                        <div className="lg:col-span-3">
+                                            <OrderPanel symbol={selectedSymbol} setSymbol={setSelectedSymbol} challenge={challenge} onOrderExecuted={handleOrderExecuted} availableSymbols={filteredMarkets} />
                                         </div>
                                     </div>
-                                    <div className="lg:col-span-3 space-y-8">
-                                        <OrderPanel symbol={selectedSymbol} setSymbol={setSelectedSymbol} challenge={challenge} onOrderExecuted={handleOrderExecuted} availableSymbols={filteredMarkets} />
+
+                                    {/* Row 2: Grand Livre | Signaux IA */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+                                        <div className="lg:col-span-9" id="grand-livre">
+                                            <div className="bg-background-card rounded-2xl border border-border overflow-hidden shadow-xl">
+                                                <div className="p-6 border-b border-border bg-background-input/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative">
+                                                    <div className="flex items-center gap-8">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="p-2 bg-primary/10 rounded-lg">
+                                                                <Clock className="w-5 h-5 text-primary" />
+                                                            </div>
+                                                            <span className="font-black text-[11px] uppercase tracking-[0.2em] text-text-secondary">{t('trading.ledger')}</span>
+                                                        </div>
+                                                        <div className="flex bg-background-input p-1.5 rounded-xl border border-border shadow-sm">
+                                                            <button onClick={() => setViewMode('CHALLENGE')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${viewMode === 'CHALLENGE' ? 'bg-primary text-black shadow-md' : 'text-text-secondary hover:text-text-primary'}`}>{t('trading.challenge')}</button>
+                                                            <button onClick={() => setViewMode('HISTORY')} className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${viewMode === 'HISTORY' ? 'bg-primary text-black shadow-md' : 'text-text-secondary hover:text-text-primary'}`}>{t('trading.history')}</button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+                                                        <input type="text" placeholder={t('trading.filter_symbol')} value={searchSymbol} onChange={(e) => setSearchSymbol(e.target.value)} className="bg-background-input border border-border rounded-xl px-4 py-2 text-[11px] text-text-primary outline-none focus:ring-1 focus:ring-primary w-full md:w-40" />
+                                                        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="bg-background-input border border-border rounded-xl px-3 py-2 text-[11px] text-text-primary outline-none focus:ring-1 focus:ring-primary">
+                                                            <option value="ALL">{t('trading.all')}</option>
+                                                            <option value="OPEN">{t('trading.open')}</option>
+                                                            <option value="CLOSED">{t('trading.closed')}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div className="overflow-x-auto max-h-[500px] custom-scrollbar">
+                                                    <table className="w-full text-left rtl:text-right">
+                                                        <thead className="bg-background-input/50 text-text-secondary text-[10px] uppercase font-black tracking-[0.2em] sticky top-0 z-10">
+                                                            <tr>
+                                                                <th className="p-6">{t('trading.instrument')}</th>
+                                                                <th className="p-6 text-center">{t('trading.type')}</th>
+                                                                <th className="p-6">{t('trading.entry')}</th>
+                                                                <th className="p-6">{t('trading.volume')}</th>
+                                                                <th className="p-6 text-right rtl:text-left">{t('trading.pnl')} ($)</th>
+                                                                <th className="p-6 text-center">% PnL</th>
+                                                                <th className="p-6 text-right rtl:text-left">{t('dashboard.target')}</th>
+                                                                {viewMode === 'CHALLENGE' && <th className="p-6 text-center">{t('admin.actions')}</th>}
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="text-sm text-text-secondary divide-y divide-border/50">
+                                                            {displayedTrades.length === 0 ? (
+                                                                <tr><td colSpan="8" className="p-16 text-center text-text-secondary font-bold italic opacity-60">{t('trading.no_positions')}</td></tr>
+                                                            ) : (
+                                                                displayedTrades.map(trade => (
+                                                                    <tr key={trade.id} className="hover:bg-primary/5 transition-all group">
+                                                                        <td className="p-6">
+                                                                            <div className="font-black text-text-primary group-hover:text-primary transition-colors text-base">{trade.symbol}</div>
+                                                                            <div className="text-[10px] text-text-secondary font-mono mt-1">{new Date(trade.timestamp).toLocaleString()}</div>
+                                                                        </td>
+                                                                        <td className="p-6 text-center">
+                                                                            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-wider transition-all duration-300 ${trade.trade_type === 'BUY'
+                                                                                ? 'bg-success/20 text-success shadow-[0_0_12px_rgba(14,203,129,0.15)]'
+                                                                                : 'bg-danger/20 text-danger shadow-[0_0_12px_rgba(246,70,93,0.15)]'}`}>
+                                                                                <Activity className="w-3 h-3" />
+                                                                                {trade.trade_type === 'BUY' ? t('trading.buy') : t('trading.sell')}
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="p-6 font-mono text-text-secondary text-sm">${trade.entry_price?.toFixed(2)}</td>
+                                                                        <td className="p-6">
+                                                                            <div className="flex flex-col">
+                                                                                <span className="font-black text-text-primary">{trade.quantity}</span>
+                                                                                <span className="text-[9px] text-text-secondary uppercase font-black tracking-tighter opacity-70">{trade.symbol.includes('.CS') ? 'Actions' : 'Lots'}</span>
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className={`p-6 text-right rtl:text-left font-black font-mono text-xs md:text-sm`}>
+                                                                            <div className="flex flex-col items-end rtl:items-start">
+                                                                                {(() => {
+                                                                                    const currentPrice = trade.current_price || trade.entry_price;
+                                                                                    const isBuy = trade.trade_type === 'BUY';
+                                                                                    const pnlValue = trade.is_closed ? trade.profit_loss : (isBuy ? (currentPrice - trade.entry_price) * trade.quantity : (trade.entry_price - currentPrice) * trade.quantity);
+                                                                                    const isPositive = pnlValue >= 0;
+                                                                                    return (
+                                                                                        <span className={isPositive ? 'text-success' : 'text-danger'}>
+                                                                                            {isPositive ? '+' : '-'}${Math.abs(pnlValue).toFixed(2)}
+                                                                                        </span>
+                                                                                    );
+                                                                                })()}
+                                                                                {!trade.is_closed && <span className="text-[9px] text-primary animate-pulse uppercase font-black tracking-widest">{t('trading.live_feed')}</span>}
+                                                                            </div>
+                                                                        </td>
+                                                                        <td className="p-6 text-center font-mono">
+                                                                            {(() => {
+                                                                                const currentPrice = trade.current_price || trade.entry_price;
+                                                                                const pnlPct = ((trade.trade_type === 'BUY' ? (currentPrice - trade.entry_price) : (trade.entry_price - currentPrice)) / trade.entry_price) * 100;
+                                                                                const isPositive = pnlPct >= 0;
+                                                                                return (
+                                                                                    <span className={`text-[11px] font-bold ${isPositive ? 'text-success' : 'text-danger'}`}>
+                                                                                        {isPositive ? '+' : ''}{pnlPct.toFixed(2)}%
+                                                                                    </span>
+                                                                                );
+                                                                            })()}
+                                                                        </td>
+                                                                        <td className="p-6 text-right rtl:text-left font-mono">
+                                                                            {(() => {
+                                                                                const targetPrice = trade.trade_type === 'BUY' ? trade.entry_price * 1.10 : trade.entry_price * 0.90;
+                                                                                return (
+                                                                                    <div className="flex flex-col items-end rtl:items-start">
+                                                                                        <span className="text-text-primary text-xs font-bold">${targetPrice.toFixed(2)}</span>
+                                                                                        <span className="text-[8px] text-text-secondary uppercase font-black tracking-widest opacity-60">Target +10%</span>
+                                                                                    </div>
+                                                                                );
+                                                                            })()}
+                                                                        </td>
+                                                                        {viewMode === 'CHALLENGE' && (
+                                                                            <td className="p-6 text-center">
+                                                                                {!trade.is_closed ? (
+                                                                                    <button
+                                                                                        onClick={() => handleCloseTrade(trade)}
+                                                                                        className="flex items-center gap-2 px-4 py-2 bg-danger/10 hover:bg-danger text-danger hover:text-white border border-danger/20 rounded-lg text-[10px] font-black transition-all uppercase shadow-md hover:shadow-danger/20 group/btn"
+                                                                                    >
+                                                                                        <X className="w-3.5 h-3.5 transition-transform group-hover/btn:rotate-180" />
+                                                                                        {t('trading.close')}
+                                                                                    </button>
+                                                                                ) : (
+                                                                                    <span className="text-[10px] text-text-secondary font-black uppercase italic opacity-50">{t('trading.closed')}</span>
+                                                                                )}
+                                                                            </td>
+                                                                        )}
+                                                                    </tr>
+                                                                ))
+                                                            )}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="lg:col-span-3">
+                                            <div className="flex flex-col h-full gap-4">
+                                                <SignalsPanel />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
