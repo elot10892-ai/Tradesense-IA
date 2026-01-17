@@ -55,16 +55,15 @@ def create_app(config_name=None):
     app.register_blueprint(ai_bp)
     
     # --- Route test racine pour vérifier que le backend fonctionne ---
-   @app.route("/")
-def home():
-    return {
-        "message": "TradeSense API online",
-        "status": "ok"
-    }
+    @app.route("/")
+    def api_status():
+        return {
+            "message": "TradeSense API online",
+            "status": "ok"
+        }
 
-
- # Créer les tables de la base de données si elles n'existent pas
- with app.app_context():
-     db.create_all()
+    # Créer les tables de la base de données si elles n'existent pas
+    with app.app_context():
+        db.create_all()
     
- return app
+    return app
