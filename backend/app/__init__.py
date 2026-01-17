@@ -4,31 +4,27 @@ from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from config import config
 
-# Initialiser les instances des extensions (en dehors de la factory pour pouvoir les importer ailleurs)
+# Extensions Flask
 db = SQLAlchemy()
 jwt = JWTManager()
 
 def create_app(config_name=None):
-    """
-    Créer et configurer l'instance de l'application Flask
-    Utilise le pattern factory pour permettre différentes configurations
-    """
     if config_name is None:
         config_name = 'default'
-    
+
     app = Flask(__name__)
-    
-    # Charger la configuration appropriée
+
+    # Charger la config
     app.config.from_object(config[config_name])
-    
-    # Initialiser les extensions avec l'application
+
+    # Init extensions
     db.init_app(app)
     jwt.init_app(app)
-    
-    # Configurer CORS pour autoriser les requêtes du frontend
+
+    # CORS
     CORS(app, origins=app.config['CORS_ORIGINS'])
-    
-    # Importer les blueprints depuis les fichiers de routes
+
+    # Blueprints
     from app.routes.auth_routes import auth_bp
     from app.routes.trading_routes import trading_bp
     from app.routes.user_routes import user_bp
@@ -40,8 +36,7 @@ def create_app(config_name=None):
     from app.routes.community_routes import community_bp
     from app.routes.masterclass_routes import masterclass_bp
     from app.routes.ai_routes import ai_bp
-    
-    # Enregistrer les blueprints dans l'application
+
     app.register_blueprint(auth_bp)
     app.register_blueprint(trading_bp)
     app.register_blueprint(user_bp)
@@ -53,17 +48,17 @@ def create_app(config_name=None):
     app.register_blueprint(community_bp)
     app.register_blueprint(masterclass_bp)
     app.register_blueprint(ai_bp)
-    
-    # --- Route test racine pour vérifier que le backend fonctionne ---
+
+    # ✅ UNE SEULE route racine
     @app.route("/")
-    def api_status():
+    def health():
         return {
-            "message": "TradeSense API online",
-            "status": "ok"
+            "status": "ok",
+            "message": "TradeSense API online"
         }
 
-    # Créer les tables de la base de données si elles n'existent pas
+    # Création DB
     with app.app_context():
         db.create_all()
-    
+
     return app
