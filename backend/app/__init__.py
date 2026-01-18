@@ -23,7 +23,13 @@ def create_app(config_name=None):
     jwt.init_app(app)
 
     # Configure CORS
-    CORS(app)
+    CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    supports_credentials=False,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 
     # Blueprints
     from app.routes.auth_routes import auth_bp
