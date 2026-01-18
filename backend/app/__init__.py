@@ -21,20 +21,11 @@ def create_app(config_name=None):
     db.init_app(app)
     jwt.init_app(app)
 
-    # Configuration CORS
-    CORS(app, resources={
-        r"/*": {
-            "origins": [
-                "http://localhost:5173",
-                "http://127.0.0.1:5173",
-                "http://localhost:3000",
-                "https://tradesense-ia-143h.vercel.app"
-            ],
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": ["Content-Type", "Authorization", "Cache-Control", "Pragma"],
-            "supports_credentials": True
-        }
-    })
+    from flask_cors import CORS
+
+CORS(app, supports_credentials=True)
+
+
 
 
     # Blueprints
