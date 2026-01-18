@@ -65,6 +65,7 @@ def create_app(config_name=None):
 
     # ✅ Route racine unique
     @app.route("/")
+    @app.route("/api/health")
     def health():
         return {
             "status": "ok",
