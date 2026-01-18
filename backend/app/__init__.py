@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-from flask_cors import CORS
+from flask_cors import CORS  
 import re
 from config import config
 
@@ -22,26 +22,25 @@ def create_app(config_name=None):
     db.init_app(app)
     jwt.init_app(app)
 
-    # Configure CORS
- from flask_cors import CORS
-
-CORS(
-    app,
-    resources={r"/*": {"origins": "*"}},  # tu peux restreindre plus tard aux URLs Vercel
-    supports_credentials=True,            # pour JWT si tu passes via cookie (optionnel)
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=[
-        "Authorization",
-        "Content-Type",
-        "Cache-Control",    # important pour ton erreur
-        "Pragma",
-        "Origin",
-        "Accept",
-        "X-Requested-With",
-        "Access-Control-Request-Method",
-        "Access-Control-Request-Headers"
-    ]
-)
+    # ✅ Configure CORS (bien indenté, pas de double import)
+    CORS(
+        app,
+        resources={r"/*": {"origins": "*"}},
+        supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=[
+            "Authorization",
+            "Content-Type",
+            "Cache-Control",
+            "Pragma",
+            "Origin",
+            "Accept",
+            "X-Requested-With",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"
+        ]
+    )
+    
     # Blueprints
     from app.routes.auth_routes import auth_bp
     from app.routes.trading_routes import trading_bp
@@ -67,7 +66,7 @@ CORS(
     app.register_blueprint(masterclass_bp)
     app.register_blueprint(ai_bp)
 
-    # ✅ Route racine unique
+    # Route racine unique
     @app.route("/")
     @app.route("/api/health")
     def health():
