@@ -23,12 +23,7 @@ def create_app(config_name=None):
     jwt.init_app(app)
 
     # Configure CORS
-    allowed_origins = [
-        "https://tradesense-ia.vercel.app",
-        "http://localhost:5173",
-        "http://localhost:3000",
-        re.compile(r"^https://tradesense-.*-ch-elots-projects\.vercel\.app$")
-    ]
+
     CORS(
     app,
     resources={r"/*": {"origins": "*"}},
