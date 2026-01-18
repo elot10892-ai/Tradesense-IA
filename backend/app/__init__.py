@@ -23,16 +23,25 @@ def create_app(config_name=None):
     jwt.init_app(app)
 
     # Configure CORS
-  CORS(
+ from flask_cors import CORS
+
+CORS(
     app,
-    resources={r"/*": {"origins": "*"}},  # Permissif pour tout déploiement
-    allow_headers="*",                     # Autorise tous les headers, y compris Cache-Control
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]  # Toutes les méthodes HTTP
+    resources={r"/*": {"origins": "*"}},  # tu peux restreindre plus tard aux URLs Vercel
+    supports_credentials=True,            # pour JWT si tu passes via cookie (optionnel)
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Authorization",
+        "Content-Type",
+        "Cache-Control",    # important pour ton erreur
+        "Pragma",
+        "Origin",
+        "Accept",
+        "X-Requested-With",
+        "Access-Control-Request-Method",
+        "Access-Control-Request-Headers"
+    ]
 )
-
-
-
-
     # Blueprints
     from app.routes.auth_routes import auth_bp
     from app.routes.trading_routes import trading_bp
