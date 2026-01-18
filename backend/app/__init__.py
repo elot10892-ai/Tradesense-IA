@@ -2,6 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+import re
 from config import config
 
 # Extensions Flask
@@ -24,11 +25,9 @@ def create_app(config_name=None):
     # Configure CORS
     allowed_origins = [
         "https://tradesense-ia.vercel.app",
-        "https://tradesense-ia-git-main-ch-elots-projects.vercel.app",
-        "https://tradesense-a2e4kav8j-ch-elots-projects.vercel.app",
-        "https://tradesense-1dcimibi8-ch-elots-projects.vercel.app",
         "http://localhost:5173",
-        "http://localhost:3000"
+        "http://localhost:3000",
+        re.compile(r"^https://tradesense-.*-ch-elots-projects\.vercel\.app$")
     ]
     CORS(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
 
