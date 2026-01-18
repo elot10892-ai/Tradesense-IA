@@ -1,7 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL
+    baseURL: import.meta.env.VITE_API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    }
 });
 
 // Interceptor to add token to every request
@@ -15,6 +18,15 @@ api.interceptors.request.use(
         } else {
             console.warn(`[API] No Token found for ${config.url}`);
         }
+
+        // ✅ Supprime les headers cache-control qu'Axios pourrait ajouter automatiquement
+        delete config.headers['cache-control'];
+        delete config.headers['Cache-Control'];
+        if (config.headers.common) {
+            delete config.headers.common['cache-control'];
+            delete config.headers.common['Cache-Control'];
+        }
+
         return config;
     },
     (error) => {
