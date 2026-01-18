@@ -21,9 +21,18 @@ def create_app(config_name=None):
     db.init_app(app)
     jwt.init_app(app)
 
-    from flask_cors import CORS
+    # Configure CORS
+    allowed_origins = [
+        "https://tradesense-ia.vercel.app",
+        "https://tradesense-ia-git-main-ch-elots-projects.vercel.app",
+        "https://tradesense-a2e4kav8j-ch-elots-projects.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000"
+    ]
+    CORS(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
 
-CORS(app, resources={r"/*": {"origins": ["https://tradesense-a2e4kav8j-ch-elots-projects.vercel.app"]}}, supports_credentials=True)
+
+
 
 
 
