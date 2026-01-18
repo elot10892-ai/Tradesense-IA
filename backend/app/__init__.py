@@ -23,7 +23,7 @@ def create_app(config_name=None):
 
     from flask_cors import CORS
 
-CORS(app, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": ["https://tradesense-a2e4kav8j-ch-elots-projects.vercel.app"]}}, supports_credentials=True)
 
 
 
