@@ -1,10 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,  // https://tradesense-ia-production.up.railway.app
-    headers: {
-        'Content-Type': 'application/json',
-    },
+    baseURL: import.meta.env.VITE_API_URL
 });
 
 // Interceptor to add token to every request

@@ -23,22 +23,11 @@ def create_app(config_name=None):
     jwt.init_app(app)
 
     # Configure CORS
-   CORS(
+  CORS(
     app,
-    resources={r"/*": {"origins": [
-        "https://tradesense-ia.vercel.app",
-        re.compile(r"^https://tradesense-.*-ch-elots-projects\.vercel\.app$"),
-        "http://localhost:5173",
-        "http://localhost:3000"
-    ]}},
-    allow_headers=[
-        "Content-Type",
-        "Authorization",
-        "Cache-Control",
-        "Pragma"
-    ],
-    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    supports_credentials=True
+    resources={r"/*": {"origins": "*"}},  # Permissif pour tout déploiement
+    allow_headers="*",                     # Autorise tous les headers, y compris Cache-Control
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]  # Toutes les méthodes HTTP
 )
 
 
