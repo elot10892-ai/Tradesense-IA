@@ -21,12 +21,11 @@ def create_app(config_name=None):
     db.init_app(app)
     jwt.init_app(app)
 
-    # CORS : ajouter ici le domaine de Vercel et Railway
-    CORS(app, origins=[
-        "http://localhost:3000",
-        "https://tradesense-ia-production.up.railway.app",  # ton backend Railway
-        "https://tradesense-ia-143h.vercel.app"            # ton frontend Vercel
-    ])
+    CORS(app, resources={r"/*": {"origins": [
+    "http://localhost:3000",
+    "https://tradesense-ia-143h.vercel.app"
+]}})
+
 
     # Blueprints
     from app.routes.auth_routes import auth_bp
