@@ -29,7 +29,17 @@ def create_app(config_name=None):
         "http://localhost:3000",
         re.compile(r"^https://tradesense-.*-ch-elots-projects\.vercel\.app$")
     ]
-    CORS(app, resources={r"/*": {"origins": allowed_origins}}, supports_credentials=True)
+    CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "Cache-Control",
+        "Pragma"
+    ],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    )
 
 
     # Blueprints
