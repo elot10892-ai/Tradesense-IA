@@ -16,6 +16,7 @@ import MasterClass from '../components/dashboard/MasterClass';
 import Pricing from './Pricing';
 import Leaderboard from './Leaderboard';
 import SignalsPanel from '../components/trading/SignalsPanel';
+import Ledger from '../components/trading/Ledger';
 
 const StatsCard = ({ title, value, subtext, icon: Icon, colorClass = "text-primary" }) => (
     <div className="bg-background-card p-4 rounded-xl border border-border shadow-sm transition-all hover:border-secondary">
@@ -322,211 +323,42 @@ const Dashboard = () => {
                                 </div>
 
                                 <div className="space-y-10">
-                                    {/* Row 1: Graphique | Instrument */}
-                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
-                                        <div className="lg:col-span-9">
-                                            <div className="bg-background-card rounded-2xl border border-border p-1 overflow-hidden shadow-2xl h-full">
-                                                <div className="p-5 border-b border-border flex justify-between items-center bg-background-input/30">
-                                                    <div className="flex items-center gap-4">
-                                                        <span className="font-black text-text-primary text-xl tracking-tight">{selectedSymbol}</span>
+                                    {/* Main Trading Area: Graphique (Left) vs Order + Signals (Right) */}
+                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start h-full">
+                                        {/* Left Column: Chart & Ledger */}
+                                        <div className="lg:col-span-9 flex flex-col gap-6 h-full">
+                                            {/* Chart Section */}
+                                            <div className="bg-background-card rounded-2xl border border-border p-1 overflow-hidden shadow-2xl shrink-0">
+                                                <div className="p-4 border-b border-border flex justify-between items-center bg-background-input/30">
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="font-black text-text-primary text-lg tracking-tight">{selectedSymbol}</span>
                                                         {selectedMarketType === 'MAROC' && <span className="px-2 py-0.5 bg-red-500/10 text-red-500 text-[10px] font-black rounded border border-red-500/20 uppercase">BVC</span>}
                                                     </div>
-                                                    <button onClick={handleSync} className="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-[11px] font-black transition-all uppercase border border-primary/20">
-                                                        <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                                                    <button onClick={handleSync} className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-[10px] font-black transition-all uppercase border border-primary/20">
+                                                        <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
                                                         {t('dashboard.sync')}
                                                     </button>
                                                 </div>
-                                                <div className="h-[550px]">
+                                                <div className="h-[500px]">
                                                     {selectedSymbol && <PriceChart symbol={selectedSymbol} />}
                                                 </div>
                                             </div>
+
+                                            {/* Grand Livre (Ledger) */}
+                                            <div className="h-fit">
+                                                <Ledger
+                                                    trades={trades}
+                                                    viewMode={viewMode}
+                                                    setViewMode={setViewMode}
+                                                    onCloseTrade={handleCloseTrade}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="lg:col-span-3">
+
+                                        {/* Right Column: Order Panel & AI Signals (STACKED) */}
+                                        <div className="lg:col-span-3 flex flex-col gap-6">
                                             <OrderPanel symbol={selectedSymbol} setSymbol={setSelectedSymbol} challenge={challenge} onOrderExecuted={handleOrderExecuted} availableSymbols={filteredMarkets} />
-                                        </div>
-                                    </div>
-
-                                    {/* Row 2: Grand Livre | Signaux IA */}
-                                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
-                                        <div id="grand-livre" className="lg:col-span-9 h-fit">
-                                            <div className="bg-background-card border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col h-fit transition-all hover:border-primary/20">
-                                                {/* Header Section */}
-                                                <div className="p-6 border-b border-border bg-background-input/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 backdrop-blur-sm">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="p-3 bg-gradient-to-br from-primary/20 to-primary/5 rounded-xl border border-primary/20 shadow-inner">
-                                                            <Clock className="w-5 h-5 text-primary" />
-                                                        </div>
-                                                        <div>
-                                                            <h3 className="font-black text-sm uppercase tracking-widest text-text-primary leading-none mb-1">{t('trading.ledger')}</h3>
-                                                            <p className="text-[10px] text-text-secondary font-bold uppercase tracking-widest opacity-60">Historique & Positions</p>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
-                                                        {/* Toggle Buttons */}
-                                                        <div className="flex bg-black/20 p-1.5 rounded-xl border border-border/50 shadow-inner">
-                                                            <button
-                                                                onClick={() => setViewMode('CHALLENGE')}
-                                                                className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${viewMode === 'CHALLENGE' ? 'bg-primary text-black shadow-md shadow-primary/20' : 'text-text-secondary hover:text-text-primary hover:bg-white/5'}`}
-                                                            >
-                                                                {t('trading.challenge')}
-                                                            </button>
-                                                            <button
-                                                                onClick={() => setViewMode('HISTORY')}
-                                                                className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${viewMode === 'HISTORY' ? 'bg-primary text-black shadow-md shadow-primary/20' : 'text-text-secondary hover:text-text-primary hover:bg-white/5'}`}
-                                                            >
-                                                                {t('trading.history')}
-                                                            </button>
-                                                        </div>
-
-                                                        {/* Filters */}
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="relative flex-1 sm:flex-none">
-                                                                <input
-                                                                    type="text"
-                                                                    placeholder={t('trading.filter_symbol')}
-                                                                    value={searchSymbol}
-                                                                    onChange={(e) => setSearchSymbol(e.target.value)}
-                                                                    className="w-full sm:w-40 bg-black/20 border border-border/50 rounded-xl pl-9 pr-4 py-2.5 text-[10px] font-bold text-text-primary outline-none focus:bg-black/40 focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all placeholder:text-text-secondary/50"
-                                                                />
-                                                                <Target className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-secondary" />
-                                                            </div>
-                                                            <select
-                                                                value={filterStatus}
-                                                                onChange={(e) => setFilterStatus(e.target.value)}
-                                                                className="bg-black/20 border border-border/50 rounded-xl px-4 py-2.5 text-[10px] font-bold text-text-primary outline-none focus:bg-black/40 focus:ring-2 focus:ring-primary/20 focus:border-primary/50 cursor-pointer shadow-sm hover:bg-black/30"
-                                                            >
-                                                                <option value="ALL" className="bg-gray-900 text-text-primary">{t('trading.all')}</option>
-                                                                <option value="OPEN" className="bg-gray-900 text-text-primary">{t('trading.open')}</option>
-                                                                <option value="CLOSED" className="bg-gray-900 text-text-primary">{t('trading.closed')}</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Table Content */}
-                                                <div className="overflow-x-auto max-h-[600px] custom-scrollbar scroll-smooth">
-                                                    <table className="w-full text-left border-collapse">
-                                                        <thead className="bg-background-card sticky top-0 z-20 shadow-sm after:content-[''] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[1px] after:bg-border">
-                                                            <tr>
-                                                                <th className="py-4 px-6 text-[9px] font-black uppercase tracking-[0.2em] text-text-secondary bg-background-input/30 backdrop-blur-md">{t('trading.instrument')}</th>
-                                                                <th className="py-4 px-6 text-center text-[9px] font-black uppercase tracking-[0.2em] text-text-secondary bg-background-input/30 backdrop-blur-md">{t('trading.type')}</th>
-                                                                <th className="py-4 px-6 text-[9px] font-black uppercase tracking-[0.2em] text-text-secondary bg-background-input/30 backdrop-blur-md">{t('trading.entry')}</th>
-                                                                <th className="py-4 px-6 text-[9px] font-black uppercase tracking-[0.2em] text-text-secondary bg-background-input/30 backdrop-blur-md">{t('trading.volume')}</th>
-                                                                <th className="py-4 px-6 text-right text-[9px] font-black uppercase tracking-[0.2em] text-text-secondary bg-background-input/30 backdrop-blur-md">{t('trading.pnl')} ($)</th>
-                                                                <th className="py-4 px-6 text-center text-[9px] font-black uppercase tracking-[0.2em] text-text-secondary bg-background-input/30 backdrop-blur-md">% PnL</th>
-                                                                <th className="py-4 px-6 text-right text-[9px] font-black uppercase tracking-[0.2em] text-text-secondary bg-background-input/30 backdrop-blur-md">{t('dashboard.target')}</th>
-                                                                {viewMode === 'CHALLENGE' && <th className="py-4 px-6 text-center text-[9px] font-black uppercase tracking-[0.2em] text-text-secondary bg-background-input/30 backdrop-blur-md">{t('admin.actions')}</th>}
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="divide-y divide-border/50">
-                                                            {displayedTrades.length === 0 ? (
-                                                                <tr>
-                                                                    <td colSpan="8" className="py-20 text-center">
-                                                                        <div className="flex flex-col items-center gap-3 opacity-40">
-                                                                            <RefreshCw className="w-8 h-8 text-text-secondary" />
-                                                                            <span className="text-xs font-black uppercase tracking-widest text-text-secondary">{t('trading.no_positions')}</span>
-                                                                        </div>
-                                                                    </td>
-                                                                </tr>
-                                                            ) : (
-                                                                displayedTrades.map(trade => (
-                                                                    <tr key={trade.id} className="group hover:bg-background-input/30 transition-colors duration-200">
-                                                                        <td className="py-4 px-6">
-                                                                            <div className="flex items-center gap-3">
-                                                                                <div className={`w-1 h-8 rounded-full ${trade.trade_type === 'BUY' ? 'bg-success' : 'bg-danger'}`} />
-                                                                                <div>
-                                                                                    <div className="font-black text-xs text-text-primary group-hover:text-primary transition-colors">{trade.symbol}</div>
-                                                                                    <div className="text-[9px] text-text-secondary font-mono opacity-70 mt-0.5">{new Date(trade.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="py-4 px-6 text-center">
-                                                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider border ${trade.trade_type === 'BUY'
-                                                                                ? 'bg-success/5 border-success/20 text-success'
-                                                                                : 'bg-danger/5 border-danger/20 text-danger'}`}>
-                                                                                {trade.trade_type === 'BUY' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
-                                                                                {trade.trade_type === 'BUY' ? t('trading.buy') : t('trading.sell')}
-                                                                            </span>
-                                                                        </td>
-                                                                        <td className="py-4 px-6">
-                                                                            <span className="font-mono text-xs font-bold text-text-secondary">${trade.entry_price?.toFixed(2)}</span>
-                                                                        </td>
-                                                                        <td className="py-4 px-6">
-                                                                            <div className="flex flex-col">
-                                                                                <span className="font-black text-xs text-text-primary">{trade.quantity}</span>
-                                                                                <span className="text-[8px] text-text-secondary font-bold uppercase tracking-widest opacity-60">{trade.symbol.includes('.CS') ? 'Actions' : 'Lots'}</span>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td className="py-4 px-6 text-right">
-                                                                            {(() => {
-                                                                                const currentPrice = trade.current_price || trade.entry_price;
-                                                                                const isBuy = trade.trade_type === 'BUY';
-                                                                                const pnlValue = trade.is_closed ? trade.profit_loss : (isBuy ? (currentPrice - trade.entry_price) * trade.quantity : (trade.entry_price - currentPrice) * trade.quantity);
-                                                                                const isPositive = pnlValue >= 0;
-                                                                                return (
-                                                                                    <div className="flex flex-col items-end">
-                                                                                        <span className={`font-mono font-black text-xs ${isPositive ? 'text-success' : 'text-danger'}`}>
-                                                                                            {isPositive ? '+' : ''}{pnlValue.toFixed(2)} $
-                                                                                        </span>
-                                                                                        {!trade.is_closed && <span className="text-[8px] text-primary animate-pulse font-black uppercase tracking-widest">LIVE</span>}
-                                                                                    </div>
-                                                                                );
-                                                                            })()}
-                                                                        </td>
-                                                                        <td className="py-4 px-6 text-center">
-                                                                            {(() => {
-                                                                                const currentPrice = trade.current_price || trade.entry_price;
-                                                                                const pnlPct = ((trade.trade_type === 'BUY' ? (currentPrice - trade.entry_price) : (trade.entry_price - currentPrice)) / trade.entry_price) * 100;
-                                                                                const isPositive = pnlPct >= 0;
-                                                                                return (
-                                                                                    <span className={`font-mono text-xs font-bold ${isPositive ? 'text-success' : 'text-danger'}`}>
-                                                                                        {isPositive ? '+' : ''}{pnlPct.toFixed(2)}%
-                                                                                    </span>
-                                                                                );
-                                                                            })()}
-                                                                        </td>
-                                                                        <td className="py-4 px-6 text-right">
-                                                                            {(() => {
-                                                                                const targetPrice = trade.trade_type === 'BUY' ? trade.entry_price * 1.10 : trade.entry_price * 0.90;
-                                                                                return (
-                                                                                    <div className="flex flex-col items-end">
-                                                                                        <span className="font-mono text-xs font-bold text-text-primary mb-0.5">${targetPrice.toFixed(2)}</span>
-                                                                                        <div className="flex items-center gap-1 opacity-50">
-                                                                                            <Target className="w-3 h-3 text-text-secondary" />
-                                                                                            <span className="text-[8px] font-black uppercase text-text-secondary">Cap</span>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                );
-                                                                            })()}
-                                                                        </td>
-                                                                        {viewMode === 'CHALLENGE' && (
-                                                                            <td className="py-4 px-6 text-center">
-                                                                                {!trade.is_closed ? (
-                                                                                    <button
-                                                                                        onClick={() => handleCloseTrade(trade)}
-                                                                                        className="p-2 bg-danger/10 hover:bg-danger text-danger hover:text-white rounded-lg transition-all duration-300 group/close shadow-sm hover:shadow-danger/30"
-                                                                                        title={t('trading.close')}
-                                                                                    >
-                                                                                        <X className="w-4 h-4 transition-transform group-hover/close:rotate-90" />
-                                                                                    </button>
-                                                                                ) : (
-                                                                                    <span className="inline-block px-2 py-0.5 bg-background-input rounded text-[9px] font-black text-text-secondary uppercase tracking-wider opacity-60">Fermé</span>
-                                                                                )}
-                                                                            </td>
-                                                                        )}
-                                                                    </tr>
-                                                                ))
-                                                            )}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="lg:col-span-3">
-                                            <div className="flex flex-col h-full gap-4">
-                                                <SignalsPanel />
-                                            </div>
+                                            <SignalsPanel />
                                         </div>
                                     </div>
                                 </div>
