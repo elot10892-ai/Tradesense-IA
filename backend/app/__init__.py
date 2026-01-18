@@ -26,6 +26,7 @@ def create_app(config_name=None):
         "https://tradesense-ia.vercel.app",
         "https://tradesense-ia-git-main-ch-elots-projects.vercel.app",
         "https://tradesense-a2e4kav8j-ch-elots-projects.vercel.app",
+        "https://tradesense-1dcimibi8-ch-elots-projects.vercel.app",
         "http://localhost:5173",
         "http://localhost:3000"
     ]
