@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-from flask_cors import CORS  
+from flask_cors import CORS
 import re
 from config import config
 
@@ -22,24 +22,17 @@ def create_app(config_name=None):
     db.init_app(app)
     jwt.init_app(app)
 
-    # ✅ Configure CORS (bien indenté, pas de double import)
-    CORS(
-        app,
-        resources={r"/*": {"origins": "*"}},
-        supports_credentials=True,
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=[
-            "Authorization",
-            "Content-Type",
-            "Cache-Control",
-            "Pragma",
-            "Origin",
-            "Accept",
-            "X-Requested-With",
-            "Access-Control-Request-Method",
-            "Access-Control-Request-Headers"
-        ]
-    )
+    # ✅ Configure CORS de manière plus permissive
+    CORS(app, resources={r"/*": {"origins": "*"}})
+    
+    # ✅ Ajoute un middleware pour forcer les headers CORS
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,cache-control,Cache-Control,Pragma,Origin,Accept,X-Requested-With')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
     
     # Blueprints
     from app.routes.auth_routes import auth_bp
