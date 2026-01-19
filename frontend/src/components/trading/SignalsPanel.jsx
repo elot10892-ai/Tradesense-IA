@@ -65,7 +65,7 @@ const SignalsPanel = () => {
                                         <div className="flex items-center gap-2">
                                             <span className="font-bold text-slate-100 text-sm tracking-tight">{signal.symbol}</span>
                                             <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-current ${textClass} bg-background/20 backdrop-blur-sm`}>
-                                                {isBuy ? 'ACHAT' : isSell ? 'VENTE' : 'NEUTRE'}
+                                                {isBuy ? 'ACHAT' : isSell ? 'VENTE' : 'HOLD'}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
@@ -90,7 +90,7 @@ const SignalsPanel = () => {
                                     <div className="flex flex-col">
                                         <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-0.5">Prix</span>
                                         <span className="font-mono text-xs font-bold text-slate-200">
-                                            {signal.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 })}
+                                            ${signal.price?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                         </span>
                                     </div>
 

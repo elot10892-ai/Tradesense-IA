@@ -7,6 +7,7 @@
         "login": "Connexion",
         "register": "Inscription",
         "logout": "Déconnexion",
+        "logout_confirm": "Voulez-vous vraiment vous déconnecter ?",
         "profile": "Profil"
     },
     "dashboard": {

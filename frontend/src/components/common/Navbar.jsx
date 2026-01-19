@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTranslation } from 'react-i18next';
-import { Menu, X, BarChart2, Shield } from 'lucide-react';
+import { Menu, X, BarChart2, Shield, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import Button from './Button';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -9,7 +9,7 @@ import LanguageSwitcher from './LanguageSwitcher';
 import ThemeToggle from './ThemeToggle';
 
 const Navbar = () => {
-    const { user, isAuthenticated, isAdmin } = useAuth();
+    const { user, isAuthenticated, isAdmin, logout } = useAuth();
     const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,10 +56,21 @@ const Navbar = () => {
                         <LanguageSwitcher />
 
                         {isAuthenticated ? (
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                                 <span className="text-sm font-bold text-primary px-3 py-1 bg-primary/10 rounded-lg">
                                     {user?.username}
                                 </span>
+                                <button
+                                    onClick={() => {
+                                        logout();
+                                        navigate('/');
+                                    }}
+                                    className="flex items-center gap-2 px-3 py-1.5 text-sm font-bold text-danger hover:bg-danger/10 rounded-lg transition-all border border-transparent hover:border-danger/20"
+                                    title={t('navbar.logout')}
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    <span className="hidden lg:inline">{t('navbar.logout')}</span>
+                                </button>
                             </div>
                         ) : (
                             <div className="flex items-center gap-3">
@@ -101,7 +112,24 @@ const Navbar = () => {
                         )}
 
                         <div className="pt-4 border-t border-border mt-2">
-                            {!isAuthenticated && (
+                            {isAuthenticated ? (
+                                <div className="flex flex-col gap-2 p-2">
+                                    <div className="px-3 py-2 text-sm font-bold text-primary bg-primary/10 rounded-lg">
+                                        {user?.username}
+                                    </div>
+                                    <button
+                                        onClick={() => {
+                                            logout();
+                                            navigate('/');
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className="flex items-center gap-2 px-3 py-2 text-sm font-bold text-danger hover:bg-danger/10 rounded-lg transition-all"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                        {t('navbar.logout')}
+                                    </button>
+                                </div>
+                            ) : (
                                 <div className="flex flex-col gap-2 p-2">
                                     <Link to="/login" className="block px-3 py-2 text-text-primary" onClick={() => setIsMenuOpen(false)}>{t('navbar.login')}</Link>
                                     <Link to="/register" className="block px-3 py-2 text-primary font-bold" onClick={() => setIsMenuOpen(false)}>{t('navbar.register')}</Link>

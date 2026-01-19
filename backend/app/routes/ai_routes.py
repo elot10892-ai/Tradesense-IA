@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from app.utils.market_data import get_historical_data, get_stock_quote
+from app.services.bvc_scraper import get_moroccan_stock_price
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -37,62 +38,57 @@ def calculate_rsi(prices, period=14):
 
 @ai_bp.route('/signals', methods=['GET'])
 def get_ai_signals():
-    # Fix symbols to only XAUUSD, EURUSD, BTCUSD
-    symbols = ['XAUUSD', 'EURUSD', 'BTCUSD']
+    # Restricted to IAM and BTC as requested
+    symbols = ['IAM.CS', 'BTCUSD']
     signals = []
 
     for symbol in symbols:
         try:
-            # Fetch historical data
-            hist_data = get_historical_data(symbol, period="1mo")
-            if not hist_data or len(hist_data) < 15:
-                # Fallback data for exam if backend fails to fetch
-                price_fback = {"XAUUSD": 2045.50, "EURUSD": 1.0850, "BTCUSD": 42500.00}
-                signals.append({
-                    "symbol": symbol,
-                    "signal": "HOLD",
-                    "price": price_fback.get(symbol, 0),
-                    "confidence": 50.0,
-                    "timestamp": datetime.now().isoformat()
-                })
+            # Use the correct price source based on symbol type
+            if symbol.endswith('.CS'):
+                # Moroccan stock - use BVC scraper
+                quote = get_moroccan_stock_price(symbol)
+            else:
+                # International - use standard quote
+                quote = get_stock_quote(symbol)
+            
+            if not quote or 'price' not in quote:
+                # If market data fails, skip this symbol
+                print(f"[AI Signals] No price data for {symbol}, skipping")
                 continue
 
-            close_prices = [d['close'] for d in hist_data]
-            current_price = close_prices[-1]
-            rsi = calculate_rsi(close_prices)
+            price = quote['price']
+            change = quote.get('change_percent', quote.get('change_24h', 0.0))
             
-            signal = "HOLD"
-            confidence = 50.0 + (abs(rsi - 50) / 2)
-            
-            if rsi < 30:
-                signal = "BUY"
-                confidence = min(98, max(75, 75 + (30 - rsi) * 2))
-            elif rsi > 70:
-                signal = "SELL"
-                confidence = min(98, max(75, 75 + (rsi - 70) * 2))
-            
-            quote = get_stock_quote(symbol)
-            if quote:
-                current_price = quote['price']
+            # AI Logic based on current live change
+            if change > 0.2:
+                signal_type = "BUY"
+                justification = f"Hausse de {change:+.2f}%. Forte dynamique haussière. Momentum acheteur confirmé."
+                confidence = min(98, 70 + (change * 5))
+            elif change < -0.2:
+                signal_type = "SELL"
+                justification = f"Baisse de {change:+.2f}%. Pression vendeuse détectée. Tendance négative."
+                confidence = min(98, 70 + (abs(change) * 5))
+            else:
+                signal_type = "HOLD"
+                justification = f"Variation de {change:+.2f}%. Marché stable. Attente de confirmation."
+                confidence = 50 + (abs(change) * 10)
 
             signals.append({
                 "symbol": symbol,
-                "signal": signal,
-                "price": current_price,
-                "confidence": round(float(confidence), 1),
-                "timestamp": datetime.now().isoformat()
+                "signal": signal_type,
+                "justification": justification,
+                "price": float(price),
+                "confidence": int(confidence)
             })
+            
+            print(f"[AI Signals] {symbol}: ${price:.2f} ({change:+.2f}%) -> {signal_type}")
 
         except Exception as e:
-            print(f"Error generating signal for {symbol}: {str(e)}")
-            # Guaranteed fallback for the 3 symbols
-            price_map = {"XAUUSD": 2045.50, "EURUSD": 1.0850, "BTCUSD": 42500.00}
-            signals.append({
-                "symbol": symbol, 
-                "signal": "HOLD", 
-                "price": price_map.get(symbol, 0),
-                "confidence": 50.0,
-                "timestamp": datetime.now().isoformat()
-            })
+            print(f"[AI Signals] Error generating signal for {symbol}: {str(e)}")
+            # No static fallback as requested
 
-    return jsonify({"signals": signals})
+    return jsonify({
+        "success": True, 
+        "signals": signals
+    })

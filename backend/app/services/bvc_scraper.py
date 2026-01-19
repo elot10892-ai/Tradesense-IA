@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Simple in-memory cache
 _cache = {}
-_CACHE_TIMEOUT = 60  # 60 seconds
+_CACHE_TIMEOUT = 10  # 10 seconds for more frequent updates
 
 
 def _get_from_cache(key: str) -> Optional[dict]:
@@ -76,7 +76,7 @@ def get_moroccan_stock_price(symbol: str) -> Optional[Dict]:
     except Exception as e:
         logger.error(f"[MoroccoPrice] yfinance failed for {symbol_upper}: {str(e)}")
 
-    # 2. Fallback Mock de Sécurité
+    # 2. Fallback Mock de Sécurité (with live variation)
     try:
         base_prices = {
             'IAM.CS': 112.50,
@@ -89,14 +89,16 @@ def get_moroccan_stock_price(symbol: str) -> Optional[Dict]:
             'BCI.CS': 290.0,
             'CFG.CS': 165.0
         }
-        price = base_prices.get(symbol_upper, 150.0)
-        price += random.uniform(-0.5, 0.5)
-        change_24h = round(random.uniform(-1.5, 1.5), 2)
+        # Use base price with variation to simulate live movement
+        base = base_prices.get(symbol_upper, 150.0)
+        price = base + random.uniform(-1.5, 1.5)  # Larger variation for visibility
+        change_24h = round(random.uniform(-2.0, 2.0), 2)  # More dynamic change
         
         result = {
             'symbol': symbol_upper,
             'price': round(price, 2),
             'change_24h': change_24h,
+            'change_percent': change_24h,  # Add this for consistency
             'timestamp': datetime.now().isoformat(),
             'source': 'FALLBACK'
         }

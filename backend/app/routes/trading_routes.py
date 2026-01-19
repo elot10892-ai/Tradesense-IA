@@ -116,6 +116,12 @@ def execute_trade():
         db.session.add(trade)
         db.session.commit()
         
+        # Immediate evaluation of killer rules (spread/commissions might trigger daily loss)
+        evaluate_killer_rules(challenge_id)
+        
+        # Re-fetch challenge to get updated status
+        db.session.refresh(challenge)
+        
         return jsonify({
             'trade': trade.to_dict(),
             'challenge': challenge.to_dict()
